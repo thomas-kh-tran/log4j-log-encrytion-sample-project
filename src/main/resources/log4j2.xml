@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN">
+    <Appenders>
+        <SecureFile name="SecureFileAppender"
+                    fileName="logs/secure-log.log"
+                    enableEncryption="true"
+                    enableHashing="true"
+                    encryptionAlgorithm="AES"
+                    hashAlgorithm="SHA-256">
+            <PatternLayout pattern="%d{ISO8601} [%t] %-5p %c - %m%n"/>
+        </SecureFile>
+    </Appenders>
+
+    <Loggers>
+        <Root level="info">
+            <AppenderRef ref="SecureFileAppender"/>
+        </Root>
+    </Loggers>
+
+</Configuration>
