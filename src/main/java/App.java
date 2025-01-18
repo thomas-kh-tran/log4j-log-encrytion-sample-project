@@ -4,20 +4,12 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.core.appender.SecureFileManager;
 
-import javax.crypto.SecretKey;
-import javax.crypto.SecretKeyFactory;
-import javax.crypto.spec.PBEKeySpec;
-import javax.crypto.spec.SecretKeySpec;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
-import java.security.spec.KeySpec;
-import java.util.Arrays;
-import java.util.Base64;
 
 public class App {
     private static final Logger logger = LogManager.getLogger(App.class);
@@ -29,62 +21,77 @@ public class App {
         logger.error("Sensitive error data.");
         checkHashes("C:\\log4j-secure-sample\\logs\\secure-log.log");
         String decryptedLog = SecureFileManager.decryptFile("C:\\log4j-secure-sample\\logs\\secure-log.log", "mySecretKey00000mySecretKey00000", "bG9nZW52aXJvbndh");
+        System.out.println(decryptedLog);
         checkHashesString(decryptedLog);
 
-        System.out.println(decryptedLog);
 
     }
     public static void checkHashes(String filePath) {
         try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
             String line;
             while ((line = br.readLine()) != null) {
-                // Check if the line contains a log message
-                //System.out.println(line);
-                // Read the next line for the hash
-                    String hashLine = br.readLine();
-                    if (hashLine != null && hashLine.startsWith("||") && hashLine.endsWith("||")) {
-                        String hash = hashLine.substring(2, hashLine.length() - 2); // Remove the ||
-                        //System.out.println(hash);
-                        // Compute the hash of the message
-                        String computedHash = computeHash(line+"\r\n");
+                // Split the line using the HASH_SEPARATOR ("||")
+                int separatorIndex = line.lastIndexOf("||");
+                if (separatorIndex != -1) {
+                    String message = line.substring(0, separatorIndex).trim();
+                    String hashWithSeparators = line.substring(separatorIndex).trim();
 
-                        // Compare the computed hash with the provided hash
-                        if (computedHash.equals(hash)) {
-                            System.out.println("Hash matches for message: " + line);
+                    // Validate hash format
+                    if (hashWithSeparators.startsWith("||")) {
+                        String extractedHash = hashWithSeparators.substring(2);
+
+                        // Compute the hash of the message
+                        String computedHash = computeHash(message);
+
+                        // Compare the computed hash with the extracted hash
+                        if (computedHash.equals(extractedHash)) {
+                            System.out.println("Hash matches for message: " + message);
                         } else {
-                            System.out.println("Hash does NOT match for message: " + line);
-                            System.out.println(computedHash);
+                            System.out.println("Hash does NOT match for message: " + message);
+                            System.out.println("Expected: " + extractedHash);
+                            System.out.println("Computed: " + computedHash);
                         }
                     }
-
+                }
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
+
     public static void checkHashesString(String logContent) {
         String[] lines = logContent.split("\n");
-        for (int i = 0; i < lines.length; i=i+2) {
-            // Check if the line contains a log message
-                String message = lines[i].trim();
 
-                // Check if the next line exists for the hash
-                if (i + 1 < lines.length && lines[i + 1].startsWith("||") && lines[i + 1].endsWith("||")) {
-                    String hash = lines[i + 1].substring(2, lines[i + 1].length() - 2); // Remove the ||
+        for (String line : lines) {
+            line = line.trim();
+            if (line.isEmpty()) continue;
+
+            // Split the line using the HASH_SEPARATOR ("||")
+            int separatorIndex = line.lastIndexOf("||");
+            if (separatorIndex != -1) {
+                String message = line.substring(0, separatorIndex).trim();
+                String hashWithSeparators = line.substring(separatorIndex).trim();
+
+                // Validate hash format
+                if (hashWithSeparators.startsWith("||")) {
+                    String extractedHash = hashWithSeparators.substring(2);
 
                     // Compute the hash of the message
-                    String computedHash = computeHash(message+"\r\n");
+                    String computedHash = computeHash(message);
 
-                    // Compare the computed hash with the provided hash
-                    if (computedHash.equals(hash)) {
+                    // Compare the computed hash with the extracted hash
+                    if (computedHash.equals(extractedHash)) {
                         System.out.println("STRING Hash matches for message: " + message);
                     } else {
                         System.out.println("STRING Hash does NOT match for message: " + message);
+                        System.out.println("Expected: " + extractedHash);
+                        System.out.println("Computed: " + computedHash);
                     }
                 }
-
+            }
         }
     }
+
 
     public static String computeHash(String message) {
         try {
