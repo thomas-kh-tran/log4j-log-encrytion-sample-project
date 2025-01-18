@@ -1,19 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Configuration status="WARN">
     <Appenders>
-        <SecureFile name="SecureFileAppender"
-                    fileName="logs/secure-log.log"
-                    enableEncryption="true"
-                    enableHashing="true"
-                    encryptionAlgorithm="AES"
-                    hashAlgorithm="SHA-256">
-            <PatternLayout pattern="%d{ISO8601} [%t] %-5p %c - %m%n"/>
-        </SecureFile>
+        <SecureFileAppender name="SecureFile"
+                            fileName="logs/secure-log.log"
+                            encryptionKey="mySecretKey00000mySecretKey00000"
+                            enableEncryption="false"
+                            enableHashing="true"
+                            append="false"
+                            iv="bG9nZW52aXJvbndh"> <!-- iv 16 bytes  key  32 bytes -->
+            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} %-5p %c{1}:%L - %m%n"/>
+        </SecureFileAppender>
     </Appenders>
 
     <Loggers>
         <Root level="info">
-            <AppenderRef ref="SecureFileAppender"/>
+            <AppenderRef ref="SecureFile"/>
         </Root>
     </Loggers>
 
