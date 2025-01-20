@@ -7,6 +7,7 @@ import org.apache.logging.log4j.core.appender.SecureFileManager;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -16,42 +17,44 @@ public class App {
 
     public static void main(String[] args) throws GeneralSecurityException {
       //  System.out.println(Arrays.toString(deriveKey("mySecretKey", null).getEncoded()));
-
-        logger.info("This is a secure log message.");
+        boolean useSalt = true;
+        logger.info("This is a secure log messageä.");
         logger.error("Sensitive error data.");
-        checkHashes("C:\\log4j-secure-sample\\logs\\secure-log.log");
+        checkHashes("C:\\log4j-secure-sample\\logs\\secure-log.log", useSalt);
         String decryptedLog = SecureFileManager.decryptFile("C:\\log4j-secure-sample\\logs\\secure-log.log", "mySecretKey00000mySecretKey00000", "bG9nZW52aXJvbndh");
         System.out.println(decryptedLog);
-        checkHashesString(decryptedLog);
+        checkHashesString(decryptedLog, useSalt);
 
 
     }
-    public static void checkHashes(String filePath) {
+    // Helper functions
+    private static void checkHashes(String filePath, boolean useSalt) {
         try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
             String line;
             while ((line = br.readLine()) != null) {
                 // Split the line using the HASH_SEPARATOR ("||")
-                int separatorIndex = line.lastIndexOf("||");
-                if (separatorIndex != -1) {
-                    String message = line.substring(0, separatorIndex).trim();
-                    String hashWithSeparators = line.substring(separatorIndex).trim();
+                String[] parts = line.split("\\|\\|");
 
-                    // Validate hash format
-                    if (hashWithSeparators.startsWith("||")) {
-                        String extractedHash = hashWithSeparators.substring(2);
+                // Ensure the line has the expected number of parts
+                if ((useSalt && parts.length == 3) || (!useSalt && parts.length == 2)) {
+                    String message = parts[0].trim();
+                    String extractedHash = parts[1].trim();
+                    String salt = useSalt ? parts[2].trim() : "";
 
-                        // Compute the hash of the message
-                        String computedHash = computeHash(message);
+                    // Compute the hash using the message and salt (if applicable)
+                    String computedHash = useSalt ? computeHash(message+salt) : computeHash(message);
 
-                        // Compare the computed hash with the extracted hash
-                        if (computedHash.equals(extractedHash)) {
-                            System.out.println("Hash matches for message: " + message);
-                        } else {
-                            System.out.println("Hash does NOT match for message: " + message);
-                            System.out.println("Expected: " + extractedHash);
-                            System.out.println("Computed: " + computedHash);
-                        }
+                    // Compare the computed hash with the extracted hash
+                    if (!computedHash.equals(extractedHash)) {
+                        System.out.println("Hash does NOT match for message: " + message);
+                        System.out.println("Expected: " + extractedHash);
+                        System.out.println("Computed: " + computedHash);
+                    }else{
+                        System.out.println("Hash matches for message: " + message);
                     }
+                } else {
+                    // Invalid format: log or handle appropriately
+                    System.out.println("Invalid format");
                 }
             }
         } catch (IOException e) {
@@ -59,7 +62,8 @@ public class App {
         }
     }
 
-    public static void checkHashesString(String logContent) {
+
+    public static void checkHashesString(String logContent, boolean useSalt) {
         String[] lines = logContent.split("\n");
 
         for (String line : lines) {
@@ -67,27 +71,28 @@ public class App {
             if (line.isEmpty()) continue;
 
             // Split the line using the HASH_SEPARATOR ("||")
-            int separatorIndex = line.lastIndexOf("||");
-            if (separatorIndex != -1) {
-                String message = line.substring(0, separatorIndex).trim();
-                String hashWithSeparators = line.substring(separatorIndex).trim();
+            String[] parts = line.split("\\|\\|");
 
-                // Validate hash format
-                if (hashWithSeparators.startsWith("||")) {
-                    String extractedHash = hashWithSeparators.substring(2);
+            // Ensure the line has the expected number of parts
+            if ((useSalt && parts.length == 3) || (!useSalt && parts.length == 2)) {
+                String message = parts[0].trim();
+                String extractedHash = parts[1].trim();
+                String salt = useSalt ? parts[2].trim() : "";
 
-                    // Compute the hash of the message
-                    String computedHash = computeHash(message);
+                // Compute the hash using the message and salt (if applicable)
+                String computedHash = useSalt ? computeHash(message+salt) : computeHash(message);
 
-                    // Compare the computed hash with the extracted hash
-                    if (computedHash.equals(extractedHash)) {
-                        System.out.println("STRING Hash matches for message: " + message);
-                    } else {
-                        System.out.println("STRING Hash does NOT match for message: " + message);
-                        System.out.println("Expected: " + extractedHash);
-                        System.out.println("Computed: " + computedHash);
-                    }
+                // Compare the computed hash with the extracted hash
+                if (!computedHash.equals(extractedHash)) {
+                    System.out.println("Hash does NOT match for message: " + message);
+                    System.out.println("Expected: " + extractedHash);
+                    System.out.println("Computed: " + computedHash);
+                }else{
+                    System.out.println("Hash matches for message: " + message);
                 }
+            } else {
+                // Invalid format: log or handle appropriately
+                System.out.println("Invalid format");
             }
         }
     }
@@ -96,7 +101,7 @@ public class App {
     public static String computeHash(String message) {
         try {
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
-            byte[] hashBytes = digest.digest(message.getBytes());
+            byte[] hashBytes = digest.digest(message.getBytes(StandardCharsets.UTF_8));
             StringBuilder hexString = new StringBuilder();
             for (byte b : hashBytes) {
                 String hex = Integer.toHexString(0xff & b);
