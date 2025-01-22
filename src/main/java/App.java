@@ -16,8 +16,8 @@ import java.util.Arrays;
 
 /**
  * The {@code App} class provides an example use of the secure logging mechanism of
- * the log4j2-logging-framework-log-encryption branch with hash validation and log file encryption for log files.
- * It demonstrates logging, secure file decryption, and validation of log message hashes.
+ * the log4j2-logging-framework-log-encryption branch for log files.
+ * It demonstrates logging, secure file encryption and decryption as well as validation of log message hashes.
  * The logging attributes are set in log4j2.xml
  */
 public class App {
