@@ -4,7 +4,7 @@
         <SecureFileAppender name="SecureFile"
                             fileName="logs/secure-log.log"
                             encryptionKey="mySecretKey00000mySecretKey00000"
-                            enableEncryption="false"
+                            enableEncryption="true"
                             enableHashing="true"
                             append="false"
                             salt="salt"
