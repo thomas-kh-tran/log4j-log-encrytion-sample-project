@@ -3,13 +3,24 @@
     <Appenders>
         <SecureFileAppender name="SecureFile"
                             fileName="logs/secure-log.log"
-                            encryptionKey="mySecretKey00000mySecretKey00000"
                             enableEncryption="true"
                             enableHashing="true"
                             append="false"
-                            salt="salt"
-                            iv="bG9nZW52aXJvbndh"> <!-- iv 16 bytes  key  32 bytes -->
-
+                            encryptionKey="mySecretKey00000mySecretKey00000"
+                            iv="bG9nZW52aXJvbndh"
+                            salt="salt">
+            <!-- A custom file appender with security features. (UTF-8 Encoding)
+                 - 'name': Unique identifier for the appender, must not be null or empty.
+                 - 'fileName': Path to the log file where the logs will be written to, must not be null or empty.
+                 - 'enableEncryption': Enable or disable encryption of log messages, default false.
+                 - 'enableHashing': Enable or disable hashing for log messages (SHA-256), default false.
+                 - 'append': Append to the log file or overwrite it, default true.
+                 - 'encryptionKey': An AES compatible key of length 16/24/32-byte used for encrypting the log file.
+                                    Only needed if encrypting.
+                 - 'iv': Initialization vector for encryption. It must be 16 bytes long. Only needed if encrypting.
+                 - 'salt': A value used in combination with hashing to enhance security. Optional
+                 - Use SECURE and RANDOMLY generated Keys/Strings for encryptionKey, iv and salt.
+            -->
             <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} %-5p %c{1}:%L - %m%n"/>
         </SecureFileAppender>
     </Appenders>
