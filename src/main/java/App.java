@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Base64;
 
 /**
  * The {@code App} class provides an example use of the secure logging mechanism of
@@ -59,7 +60,7 @@ public class App {
                     String salt = useSalt ? parts[2].trim() : "";
 
                     // Compute the hash using the message and salt (if applicable)
-                    String computedHash = useSalt ? computeHash(message+salt) : computeHash(message);
+                    String computedHash = useSalt ? computeHash(message,salt) : computeHash(message, null);
 
                     // Compare the computed hash with the extracted hash
                     if (!computedHash.equals(extractedHash)) {
@@ -102,7 +103,7 @@ public class App {
                 String salt = useSalt ? parts[2].trim() : "";
 
                 // Compute the hash using the message and salt (if applicable)
-                String computedHash = useSalt ? computeHash(message+salt) : computeHash(message);
+                String computedHash = useSalt ? computeHash(message, salt) : computeHash(message, null);
 
                 // Compare the computed hash with the extracted hash
                 if (!computedHash.equals(extractedHash)) {
@@ -120,14 +121,26 @@ public class App {
     }
 
     /**
-     * Computes the hash of a given String (UTF-8 encoded) with Algorithm SHA-256 using the default provider
+     * Computes the hash of a given String (UTF-8 encoded) and Salt (Base64) with Algorithm SHA-256 using the default provider
      *
      * @param message The String to be hashed.
+     * @param salt The salt to be appended.
+     * @return computed hash
      */
-    public static String computeHash(String message) {
+    private static String computeHash(String message, String salt) {
         try {
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
-            byte[] hashBytes = digest.digest(message.getBytes(StandardCharsets.UTF_8));
+            byte[] data = message.getBytes(StandardCharsets.UTF_8);
+            byte[] hashBytes;
+            if (salt != null){
+                byte[] storedSalt = Base64.getDecoder().decode(salt);
+                byte[] dataWithSalt = new byte[data.length + storedSalt.length];
+                System.arraycopy(data, 0, dataWithSalt, 0, data.length);
+                System.arraycopy(storedSalt, 0, dataWithSalt, data.length, storedSalt.length);
+                hashBytes = digest.digest(dataWithSalt);
+            }else {
+                hashBytes = digest.digest(data);
+            }
             StringBuilder hexString = new StringBuilder();
             for (byte b : hashBytes) {
                 String hex = Integer.toHexString(0xff & b);

@@ -8,7 +8,7 @@
                             append="false"
                             encryptionKey="mySecretKey00000mySecretKey00000"
                             iv="bG9nZW52aXJvbndh"
-                            salt="salt">
+                            useSalt = "true">
             <!-- A custom file appender with security features. (UTF-8 Encoding)
                  - 'name': Unique identifier for the appender, must not be null or empty.
                  - 'fileName': Path to the log file where the logs will be written to, must not be null or empty.
@@ -18,8 +18,8 @@
                  - 'encryptionKey': An AES compatible key of length 16/24/32-byte used for encrypting the log file.
                                     Only needed if encrypting.
                  - 'iv': Initialization vector for encryption. It must be 16 bytes long. Only needed if encrypting.
-                 - 'salt': A value used in combination with hashing to enhance security. Optional
-                 - Use SECURE and RANDOMLY generated Keys/Strings for encryptionKey, iv and salt.
+                 - 'useSalt': Enable or disable salting for hashing for log messages, default false
+                 - Use SECURE and RANDOMLY generated Keys/Strings for encryptionKey, iv .
             -->
             <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} %-5p %c{1}:%L - %m%n"/>
         </SecureFileAppender>
