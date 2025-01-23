@@ -16,8 +16,8 @@ This sample project demonstrates logging, secure file encryption and decryption,
 
 ## Troubleshooting
 
-1. Check your security provider by executing Security.getProviders() 
+1. Check your security providers by executing Security.getProviders() 
 2. Try using the default provider (SUN)
-3. Some Providers don't work with the currently implemented AES CTR mode,
+3. Some Providers(for example BouncyCastle) don't work with the currently implemented AES CTR mode,
  see [here](https://stackoverflow.com/questions/16292694/simulating-a-stream-cipher-with-aes-ctr).
  This is likely attributable to its use of a BufferedOutputStream.
