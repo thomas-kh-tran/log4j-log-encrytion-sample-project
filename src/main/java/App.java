@@ -29,7 +29,7 @@ public class App {
         //If hashing enabled in XML
         checkHashes("C:\\log4j-secure-sample\\logs\\secure-log.log", useSalt);
 
-        //If encryption enabled in XML
+        //If encryption enabled in XML, for decryption using an exposed method from SecureFileManager
         String decryptedLog = SecureFileManager.decryptFile("C:\\log4j-secure-sample\\logs\\secure-log.log", "mySecretKey00000mySecretKey00000", "bG9nZW52aXJvbndh");
         System.out.println(decryptedLog);
 
