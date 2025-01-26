@@ -27,7 +27,7 @@ public class App {
         logger.info("This is a secure log message.");
         logger.error("Sensitive error data.");
 
-        //If hashing enabled in XML
+        //If hashing and no encryption is enabled in XML
         checkHashes("C:\\log4j-secure-sample\\logs\\secure-log.log", useSalt);
 
         //If encryption enabled in XML, for decryption using an exposed method from SecureFileManager
